@@ -1,0 +1,50 @@
+mindmap
+  root((Replication))
+    id1["`**Single Leader / Leader Based**. Clients send writes to leader. Leader writes to local storage and sends change to followers.`"]
+        Sync/Async Replication
+            id1["`**Sync** All followers written in sync. Not usualy used as can't make all followers sync`"]
+            id1["`**Semi-Sync** Some followers written in sync and others async.`"]
+            id1["`**Async** All followers written in Async. Leader can still continue processing writes. Used more widely used than others`"]
+        Handling Node Outages
+            id1["`**Follower failure - Catchup Recovery** Each follower keeps log of data chnages recvd from leader. When joining back requestes changes since last disconected.`"]
+            id1["`**Leader failure - Failover** On leader outage. Clients need to be reconfigured to send to new leader.`"]
+                id1["`**Failover process**
+                *Determine leader has failed*: Via say heartbeats 
+                *Chosing New Leader*: Via election process or via a controlling node. Usually leader is node that las latest update. 
+                *Reconfiguring system for new leader*: Clients need to send to new leader. New leader when coming back should join as follwer and not leader`"]
+                id1["`**Failover Gotchas** 
+                *Conflicts*: if leader was written to during outage there could be conflicting writes
+                *Keys*: If conflicting data is discarded. sequential keys generated in new leader and old leader may get overwritten causing user to see others data etc
+                *Split Brain:* Safety mechanisms required for ensuring only one leader exists
+                *Leader Timeout:* Long timeout causes longer recocovery. Shorter Timeouts cause oscillating and unnecessary failures.`"]
+        How does Leader based replication work?
+            id1["`**Statement based relication** 
+            Each write request statement is sent to followers.
+            *Cons:* some statement may have calaucted values or auto incrementing sequences or side effects such as triggers.
+            Not generally preferred`"]
+            id1["`**Write Ahead Logs (WAL) shipping** 
+            The LSM tree log statement (physical data representation) is sent to followers. Follower processes the log and build a replica.
+            *Cons:* The logs are in machine native format. So version upgrades etc are difficult. Leaders and followers should be on same version.`"]
+            id1["`**Logical (row-based) replication** 
+            Log statement is logical info eg; For an insert all values of columns, For deletion the primary key etc.
+            Easier for external tools to parse and use ; Used in Change Data Capture.`"]
+            id1["`**Trigger based replication** 
+            Triggeres done to application code and application code responsible for replicaticating data chnage. Uses Triggeres/Stored Procedures.`"]
+        Problems with replication
+            id1["`**Read own Writes** 
+                Application writes to leader and reads from a follower which doesn't have the update. 
+                *Solution:* Read own updates from leader itself. eg. user profile update should always be from leader. other profiles may be from followers.
+                OR on an update read from leader for some duration and after that read from followers.
+                OR add a counter for each update and if read from follower has a lower counter read from somewhere else.
+                *Cons*: Cross device reads can't track upates so would get stale information`"]
+            id1["`**Monotonic Reads**
+                App reads from replica which has Update U2 but next read on another replica with previous update. So app may see updates going backward
+                Monotonic reads is a gurantee < Strong consistency but > eventual.
+                *Solution:* App always reads from same replica or set of replica. The replica(set) is determined via User Id hash.`"]
+            id1["`**Consistent Prefix Reads**
+                Sequence of writes happen in an order and reads for them also happen in order.
+                Else, Updates to related information can go out of sync.`"]
+        Solution for replication lag: Transactions
+        
+
+
