@@ -1,2 +1,2 @@
 # DDIA
-Learning from Designing Data Intensive Applications
+Learnings from Designing Data Intensive Applications
