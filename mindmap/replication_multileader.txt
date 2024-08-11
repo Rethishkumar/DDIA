@@ -1,0 +1,51 @@
+mindmap
+  root((Multi-Leader</br>Replication))
+    Definition
+      More than one node can accept writes and each node forwards data changes to other nodes.</br> Also called master-master/active-active replication.
+    Use Cases
+      id1["`**Multi-Datacenter Replication**
+      Each datacenter has a leader. Inside datacenter, leader based replication is used.`"]
+        Pros
+            id1["`**Performance**
+            writes processed in local datacenter.
+            Async replication delay hidden from user`"]
+            id1["`**Datacenter Outage Tolerance**
+            Each datacenter operates independently of others`"]
+            id1["`**Network Outage Tolerance**
+            Temporary network outage does not prevent writes from being processed`"]
+        Cons
+            id1["`**Conflicts**
+            Autoincrementing Keys, triggers etc can be problematic. 
+            Multi-Leader should be avoided if possible.`"]
+      
+      id1["`**Clients with Offline Operation**
+      eg; Calender applications. Each device can be considered as a leader. 
+      Useable offline and should sync changes when connected`"]
+      
+      id1["`**Collaborative Editing**
+      egl Etherpad, Google Docs. User edits are instantly applied to local replica and replicated to server and other users.
+      For faster collabotation, unit of change is very small. eg; a keystroke etc.`"]
+
+    Handling Write Conflicts
+        id1["`**Conflict Avoidance**
+        Requests from a particular user routed to same datacenter. 
+        But can still cause isues of user is routed to a differeent datacenter due to outage.`"]
+        id1["`**Converging towards Consistent State**
+        A. Use an id for each chnage and chnage with higer id wins. Prone to data loss
+        B. each replica assigned an id. Data from higer replica used. Prone to data loss
+        C. Merge the values and keep. For chnages B and D. set value as B+D
+        D. Record the conflict and application reponsible for resolving conflict`"]
+        id1["`**Custom Conflict Resolution**
+        On Write: Triggers an automated conflict handler that resolves conflicts
+        On Read: On conflict detection all conflicts stored. On a data read, application prompted to resolve conflicts`"]
+    
+    Replication Topologies
+        id1["`**Circular**
+        with 4 nodes A replicates to B, B to C and so on. 
+        An outage on one node can interupt replication to other nodes `"]
+        id1["`**Star / Tree**
+        An outage on one node can interupt replication to other nodes. 
+        In circular and tree, To prevent loop, change is tagged with node id. node receiving chnage with it's own tag discards it `"]
+        id1["`**All-to-All**
+        Most general topology. All nodes replicate to other nodes.
+        Can casue replication issues such as consistent prefix reads.`"]
